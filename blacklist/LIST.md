@@ -1,4 +1,4 @@
-## Last update: 26.03.2024
+## Last update: 03.09.2024
 
 ```
 borislav.georgiev@iara.government.bg
