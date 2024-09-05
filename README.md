@@ -14,7 +14,7 @@ Stanowi to proaktywne działanie w dziedzinie bezpieczeństwa e-mail, mające na
 
 
 ## How to use this list?
-The list of blacklisted email addresses is available in the [LIST.txt](blacklist/LIST.md) file.
+The list of blacklisted email addresses is available in the [LIST.txt](blacklist/LIST.txt) file.
 
 ## Where can I get a preview of the content of spam emails?
 Markdown files containing the contents of emails can be found in the [blacklist/mails](blacklist/mails) folder.
