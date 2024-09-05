@@ -15,7 +15,7 @@ Stanowi to proaktywne działanie w dziedzinie bezpieczeństwa e-mail, mające na
 
 ## How to use this list?
 The list of blacklisted email addresses is available in the [LIST.txt](blacklist/LIST.txt) file.
-```js
+```
 https://raw.githubusercontent.com/sefinek24/Blacklisted-Emails/main/blacklist/LIST.txt
 ```
 
