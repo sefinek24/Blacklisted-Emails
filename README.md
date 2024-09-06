@@ -10,6 +10,9 @@ Repozytorium zawiera listę adresów e-mail zidentyfikowanych jako źródła spa
 Większość z nich zawiera także treści wiadomości, często związane z oszustwami.
 Lista ma na celu ułatwienie identyfikacji potencjalnych zagrożeń, co umożliwia zwiększenie bezpieczeństwa e-mail poprzez blokowanie lub oznaczanie podejrzanych adresów.
 
+### ARA
+يحتوي هذا المستودع على قائمة بعناوين البريد الإلكتروني التي تم تحديدها كمصادر للرسائل غير المرغوب فيها التي تستهدف خوادم البريد المختلفة. تتضمن العديد من رسائل البريد الإلكتروني هذه محتوى الرسائل، والتي غالبا ما تكون مخططات احتيالية. الغرض من هذه القائمة هو مساعدة المستخدمين على تحديد التهديدات المحتملة، وتعزيز أمان بريدهم الإلكتروني عن طريق حظر هذه العناوين أو وضع علامة عليها مسبقًا.
+
 ## How to use this list?
 The list of blacklisted email addresses is available in the [LIST.txt](blacklist/LIST.txt) file.
 ```
