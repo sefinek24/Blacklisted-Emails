@@ -23,10 +23,21 @@ jobs:
       - name: Extract issue content
         id: extract_content
         run: |
-          echo "EMAIL=$(echo \"${{ github.event.issue.body }}\" | grep -oP '(?<=## Email\n\n)[^\n]+')" >> $GITHUB_ENV
-          echo "TITLE=$(echo \"${{ github.event.issue.body }}\" | grep -oP '(?<=## Title\n\n)[^\n]+')" >> $GITHUB_ENV
-          echo "DATE=$(echo \"${{ github.event.issue.body }}\" | grep -oP '(?<=## Date\n\n)[^\n]+')" >> $GITHUB_ENV
-          echo "CONTENT=$(echo \"${{ github.event.issue.body }}\" | awk '/## Content/{flag=1;next}/```/{flag=0}flag')" >> $GITHUB_ENV
+          EMAIL=$(echo "${{ github.event.issue.body }}" | grep -oP '(?<=## Email\s*\n)[^\n]+')
+          TITLE=$(echo "${{ github.event.issue.body }}" | grep -oP '(?<=## Title\s*\n)[^\n]+')
+          DATE=$(echo "${{ github.event.issue.body }}" | grep -oP '(?<=## Date\s*\n)[^\n]+')
+          CONTENT=$(echo "${{ github.event.issue.body }}" | sed -n '/## Content/,/```/{//!p}')
+
+          # Displaying values for debugging
+          echo "EMAIL=$EMAIL" >> $GITHUB_ENV
+          echo "TITLE=$TITLE" >> $GITHUB_ENV
+          echo "DATE=$DATE" >> $GITHUB_ENV
+          echo "CONTENT=$CONTENT" >> $GITHUB_ENV
+
+          echo "Extracted EMAIL: $EMAIL"
+          echo "Extracted TITLE: $TITLE"
+          echo "Extracted DATE: $DATE"
+          echo "Extracted CONTENT: $CONTENT"
 
       - name: Comment on the issue
         run: |
@@ -76,12 +87,6 @@ jobs:
           CONTENT=${{ env.CONTENT }}
 
           mkdir -p blacklist/mails
-
-          echo "EMAIL: $EMAIL"
-          echo "TITLE: $TITLE"
-          echo "DATE: $DATE"
-          echo "CONTENT: $CONTENT"
-
           echo -e "**Title:** $TITLE\n\n**Date:** $DATE\n\n**Content:**\n\`\`\`plaintext\n$CONTENT\n\`\`\`" > blacklist/mails/${EMAIL}.md
 
       - name: Commit changes
