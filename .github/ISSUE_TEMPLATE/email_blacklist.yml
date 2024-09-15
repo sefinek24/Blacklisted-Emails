@@ -1,0 +1,39 @@
+name: "Blacklist Email"
+description: "Report an email to be added to the blacklist"
+title: "Blacklist email: [EMAIL]"
+labels: ["blacklist"]
+assignees: "sefinek24"
+
+body:
+  - type: input
+    id: email
+    attributes:
+      label: "Email"
+      description: "Enter the email address to be blacklisted"
+      placeholder: "example@example.com"
+      required: true
+
+  - type: input
+    id: title
+    attributes:
+      label: "Title"
+      description: "Enter the title of the email/message"
+      placeholder: "Email title"
+      required: true
+
+  - type: input
+    id: date
+    attributes:
+      label: "Date"
+      description: "Enter the date of the message"
+      placeholder: "15.09.2024"
+      required: true
+
+  - type: textarea
+    id: content
+    attributes:
+      label: "Content"
+      description: "Enter the full content of the message"
+      placeholder: "Enter the message content here..."
+      value: ""
+      required: true
