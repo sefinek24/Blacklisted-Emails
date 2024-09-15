@@ -1,0 +1,42 @@
+name: Add email to blacklist
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  add_email_to_blacklist:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Extract issue content
+        id: extract_content
+        run: |
+          echo "EMAIL=$(echo "${{ github.event.issue.body }}" | grep -oP '(?<=## Email\n\n)[^\n]+')" >> $GITHUB_ENV
+          echo "TITLE=$(echo "${{ github.event.issue.body }}" | grep -oP '(?<=## Title\n\n)[^\n]+')" >> $GITHUB_ENV
+          echo "DATE=$(echo "${{ github.event.issue.body }}" | grep -oP '(?<=## Date\n\n)[^\n]+')" >> $GITHUB_ENV
+          echo "CONTENT=$(echo "${{ github.event.issue.body }}" | awk '/## Content/{flag=1;next}/```/{flag=0}flag')" >> $GITHUB_ENV
+
+      - name: Add email to blacklist
+        run: |
+          EMAIL=${{ env.EMAIL }}
+          TIMESTAMP=$(date +"%d.%m.%Y")
+
+          # Update timestamp in LIST.txt
+          sed -i "1s/.*/# Last update: $TIMESTAMP/" blacklist/LIST.txt
+
+          # Add email to the end of LIST.txt
+          echo "$EMAIL" >> blacklist/LIST.txt
+
+      - name: Create email file in mails directory
+        run: |
+          EMAIL=${{ env.EMAIL }}
+          TITLE=${{ env.TITLE }}
+          DATE=${{ env.DATE }}
+          CONTENT=${{ env.CONTENT }}
+
+          mkdir -p blacklist/mails
+          echo -e
