@@ -27,6 +27,8 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           issue_id: ${{ github.event.issue.number }}
           separator: '###'
+          label_marker_start: ''
+          label_marker_end: ''
 
       - name: Debug parsed data
         run: |
