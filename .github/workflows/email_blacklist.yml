@@ -26,13 +26,23 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           issue_id: ${{ github.event.issue.number }}
+          separator: '###'
+
+      - name: Debug parsed data
+        run: |
+          echo "Parsed data: ${{ steps.parse.outputs.payload }}"
 
       - name: Extract parsed data
         run: |
-          echo "Email: ${{ steps.parse.outputs.email }}"
-          echo "Title: ${{ steps.parse.outputs.title }}"
-          echo "Date: ${{ steps.parse.outputs.date }}"
-          echo "Content: ${{ steps.parse.outputs.content }}"
+          EMAIL=$(echo "${{ steps.parse.outputs.payload }}" | jq -r '.Email')
+          TITLE=$(echo "${{ steps.parse.outputs.payload }}" | jq -r '.Title')
+          DATE=$(echo "${{ steps.parse.outputs.payload }}" | jq -r '.Date')
+          CONTENT=$(echo "${{ steps.parse.outputs.payload }}" | jq -r '.Content')
+
+          echo "Email: $EMAIL"
+          echo "Title: $TITLE"
+          echo "Date: $DATE"
+          echo "Content: $CONTENT"
 
       - name: Comment on the issue
         run: |
