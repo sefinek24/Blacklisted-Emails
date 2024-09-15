@@ -32,10 +32,10 @@ jobs:
 
       - name: Extract parsed data
         run: |
-          EMAIL=$(echo "${{ steps.parse.outputs.payload }}" | jq -r '.email')
-          TITLE=$(echo "${{ steps.parse.outputs.payload }}" | jq -r '.title')
-          DATE=$(echo "${{ steps.parse.outputs.payload }}" | jq -r '.date')
-          CONTENT=$(echo "${{ steps.parse.outputs.payload }}" | jq -r '.content')
+          EMAIL=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.Email')
+          TITLE=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.Title')
+          DATE=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.Date')
+          CONTENT=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.Content')
 
           echo "Email: $EMAIL"
           echo "Title: $TITLE"
