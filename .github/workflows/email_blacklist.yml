@@ -20,25 +20,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Parse issue content
-        id: parse
-        uses: onmax/issue-form-parser@v1.5
-        with:
-          issue_number: ${{ github.event.issue.number }}
-
-      - name: Extract parsed data
-        id: extract_email
-        run: |
-          EMAIL=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.email')
-          TITLE=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.title')
-          DATE=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.date')
-          CONTENT=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.content')
-          
-          echo "email=$EMAIL" >> $GITHUB_ENV
-          echo "title=$TITLE" >> $GITHUB_ENV
-          echo "date=$DATE" >> $GITHUB_ENV
-          echo "content=$CONTENT" >> $GITHUB_ENV
-
       - name: Comment on the issue
         run: |
           curl -X POST \
@@ -55,6 +36,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Parse issue content
+        id: parse
+        uses: onmax/issue-form-parser@v1.5
+        with:
+          issue_number: ${{ github.event.issue.number }}
+
+      - name: Extract parsed data
+        id: extract_email
+        run: |
+          EMAIL=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.email')
+          TITLE=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.title')
+          DATE=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.date')
+          CONTENT=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.content')
+
+          echo "email=$EMAIL" >> $GITHUB_ENV
+          echo "title=$TITLE" >> $GITHUB_ENV
+          echo "date=$DATE" >> $GITHUB_ENV
+          echo "content=$CONTENT" >> $GITHUB_ENV
+
       - name: Extract comment command
         run: |
           COMMENT="${{ github.event.comment.body }}"
@@ -69,7 +69,6 @@ jobs:
       - name: Proceed if accepted
         if: ${{ env.DECISION == 'accept' }}
         run: |
-          EMAIL="${{ github.event.issue.title }}"
           TIMESTAMP=$(date +"%d.%m.%Y")
 
           # Update timestamp in LIST.txt
@@ -82,7 +81,7 @@ jobs:
         if: ${{ env.DECISION == 'accept' }}
         run: |
           mkdir -p blacklist/mails
-          echo -e "**Title:** ${{ github.event.issue.title }}\n\n**Date:** ${{ github.event.issue.created_at }}\n\n**Content:**\n\`\`\`plaintext\n${{ github.event.issue.body }}\n\`\`\`" > blacklist/mails/$EMAIL.md
+          echo -e "**Title:** $TITLE\n\n**Date:** $DATE\n\n**Content:**\n\`\`\`text\n$CONTENT\n\`\`\`" > blacklist/mails/$EMAIL.md
 
       - name: Commit changes
         if: ${{ env.DECISION == 'accept' }}
