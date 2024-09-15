@@ -15,6 +15,11 @@ jobs:
   add_email_to_blacklist:
     runs-on: ubuntu-latest
     if: ${{ github.event.action == 'opened' }}
+    outputs:
+      email: ${{ steps.set_env.outputs.email }}
+      title: ${{ steps.set_env.outputs.title }}
+      date: ${{ steps.set_env.outputs.date }}
+      content: ${{ steps.set_env.outputs.content }}
 
     steps:
       - name: Checkout repository
@@ -26,28 +31,13 @@ jobs:
         with:
           issue_number: ${{ github.event.issue.number }}
 
-      - name: Debug parsed data
-        run: |
-          echo "Parsed data: ${{ steps.parse.outputs.payload }}"
-
       - name: Extract parsed data
+        id: set_env
         run: |
-          EMAIL=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.email')
-          TITLE=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.title')
-          DATE=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.date')
-          CONTENT=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.content')
-
-          echo "Email: $EMAIL"
-          echo "Title: $TITLE"
-          echo "Date: $DATE"
-          echo "Content: $CONTENT"
-
-      - name: Set email data to environment
-        run: |
-          echo "EMAIL=${EMAIL}" >> $GITHUB_ENV
-          echo "TITLE=${TITLE}" >> $GITHUB_ENV
-          echo "DATE=${DATE}" >> $GITHUB_ENV
-          echo "CONTENT=${CONTENT}" >> $GITHUB_ENV
+          echo "email=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.email')" >> $GITHUB_ENV
+          echo "title=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.title')" >> $GITHUB_ENV
+          echo "date=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.date')" >> $GITHUB_ENV
+          echo "content=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.content')" >> $GITHUB_ENV
 
       - name: Comment on the issue
         run: |
@@ -58,6 +48,7 @@ jobs:
             https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments
 
   process_decision:
+    needs: add_email_to_blacklist
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'issue_comment' && github.event.action == 'created' }}
 
@@ -80,7 +71,7 @@ jobs:
       - name: Proceed if accepted
         if: ${{ env.DECISION == 'accept' }}
         run: |
-          EMAIL=${{ env.EMAIL }}
+          EMAIL="${{ needs.add_email_to_blacklist.outputs.email }}"
           TIMESTAMP=$(date +"%d.%m.%Y")
 
           # Update timestamp in LIST.txt
@@ -93,7 +84,7 @@ jobs:
         if: ${{ env.DECISION == 'accept' }}
         run: |
           mkdir -p blacklist/mails
-          echo -e "**Title:** ${{ env.TITLE }}\n\n**Date:** ${{ env.DATE }}\n\n**Content:**\n\`\`\`plaintext\n${{ env.CONTENT }}\n\`\`\`" > blacklist/mails/${{ env.EMAIL }}.md
+          echo -e "**Title:** ${{ needs.add_email_to_blacklist.outputs.title }}\n\n**Date:** ${{ needs.add_email_to_blacklist.outputs.date }}\n\n**Content:**\n\`\`\`plaintext\n${{ needs.add_email_to_blacklist.outputs.content }}\n\`\`\`" > blacklist/mails/${{ needs.add_email_to_blacklist.outputs.email }}.md
 
       - name: Commit changes
         if: ${{ env.DECISION == 'accept' }}
@@ -101,7 +92,7 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add blacklist/LIST.txt blacklist/mails/
-          git commit -m "Add ${{ env.EMAIL }} to blacklist"
+          git commit -m "Add ${{ needs.add_email_to_blacklist.outputs.email }} to blacklist"
           git push
 
       - name: Post rejection comment if rejected
