@@ -82,7 +82,7 @@ jobs:
         if: ${{ env.DECISION == 'accept' }}
         run: |
           mkdir -p blacklist/mails
-          echo -e "**Title:** ${{ github.event.issue.title }}\n\n**Date:** ${{ github.event.issue.created_at }}\n\n**Content:**\n\`\`\`plaintext\n${{ github.event.issue.body }}\n\`\`\`" > blacklist/mails/$EMAIL.md
+          echo -e "**Title:** $TITLE\n\n**Date:** $DATE\n\n**Content:**\n$CONTENT" > blacklist/mails/${{ github.event.issue.title }}.md
 
       - name: Commit changes
         if: ${{ env.DECISION == 'accept' }}
