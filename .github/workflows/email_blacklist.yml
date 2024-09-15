@@ -36,24 +36,27 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Parse issue content
-        id: parse
-        uses: onmax/issue-form-parser@v1.5
-        with:
-          issue_number: ${{ github.event.issue.number }}
-
-      - name: Extract parsed data
-        id: extract_email
+      - name: Parse issue content and handle content
+        id: extract_email_and_content
         run: |
-          EMAIL=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.email')
-          TITLE=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.title')
-          DATE=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.date')
-          CONTENT=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.content')
-          
+          EMAIL=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.Email')
+          TITLE=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.Title')
+          DATE=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.Date')
+          CONTENT=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.Content')
+
+          # Debug info
+          echo "Parsed Email: $EMAIL"
+          echo "Parsed Title: $TITLE"
+          echo "Parsed Date: $DATE"
+          echo "Parsed Content: $CONTENT"
+
+          # Save Email, Title, and Date to environment
           echo "email=$EMAIL" >> $GITHUB_ENV
           echo "title=$TITLE" >> $GITHUB_ENV
           echo "date=$DATE" >> $GITHUB_ENV
-          echo "content=$CONTENT" >> $GITHUB_ENV
+
+          # Save the Content to a temporary file
+          echo "$CONTENT" > content.tmp
 
       - name: Extract comment command
         run: |
