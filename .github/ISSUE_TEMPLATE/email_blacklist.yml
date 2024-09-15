@@ -35,3 +35,7 @@ body:
       label: Content
     validations:
       required: true
+    render: |
+      \`\`\`plaintext
+      {{ content }}
+      \`\`\`
