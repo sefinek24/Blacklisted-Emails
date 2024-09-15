@@ -20,18 +20,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Extract issue content
-        id: extract_content
-        run: |
-          EMAIL=$(echo "${{ github.event.issue.body }}" | grep -oP '(?<=Email: ).*')
-          TITLE=$(echo "${{ github.event.issue.body }}" | grep -oP '(?<=Title: ).*')
-          DATE=$(echo "${{ github.event.issue.body }}" | grep -oP '(?<=Date: ).*')
-          CONTENT=$(echo "${{ github.event.issue.body }}" | grep -oP '(?<=Content:\n).*')
+      - name: Parse issue content
+        id: parse
+        uses: peter-murray/issue-forms-body-parser@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          issue_id: ${{ github.event.issue.number }}
 
-          echo "EMAIL=$EMAIL" >> $GITHUB_ENV
-          echo "TITLE=$TITLE" >> $GITHUB_ENV
-          echo "DATE=$DATE" >> $GITHUB_ENV
-          echo "CONTENT=$CONTENT" >> $GITHUB_ENV
+      - name: Extract parsed data
+        run: |
+          echo "Email: ${{ steps.parse.outputs.email }}"
+          echo "Title: ${{ steps.parse.outputs.title }}"
+          echo "Date: ${{ steps.parse.outputs.date }}"
+          echo "Content: ${{ steps.parse.outputs.content }}"
 
       - name: Comment on the issue
         run: |
