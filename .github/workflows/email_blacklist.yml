@@ -2,10 +2,11 @@ name: Add email to blacklist
 
 on:
   issues:
-    types: [opened]
+    types: [opened, edited]
 
 jobs:
   add_email_to_blacklist:
+    if: github.event.action == 'opened'
     runs-on: ubuntu-latest
 
     steps:
@@ -20,7 +21,34 @@ jobs:
           echo "DATE=$(echo "${{ github.event.issue.body }}" | grep -oP '(?<=## Date\n\n)[^\n]+')" >> $GITHUB_ENV
           echo "CONTENT=$(echo "${{ github.event.issue.body }}" | awk '/## Content/{flag=1;next}/```/{flag=0}flag')" >> $GITHUB_ENV
 
-      - name: Add email to blacklist
+      - name: Comment on the issue
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"body":"We have received the issue. A repository collaborator or owner must `accept` or `reject` this request in the comments."}' \
+            https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments
+
+  process_decision:
+    if: github.event.action == 'edited'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Extract comment command
+        id: extract_command
+        run: |
+          COMMENT="${{ github.event.issue.body }}"
+          if [[ "$COMMENT" == *"accept"* ]]; then
+            echo "DECISION=accept" >> $GITHUB_ENV
+          elif [[ "$COMMENT" == *"reject"* ]]; then
+            echo "DECISION=reject" >> $GITHUB_ENV
+          else
+            echo "DECISION=none" >> $GITHUB_ENV
+
+      - name: Proceed if accepted
+        if: env.DECISION == 'accept'
         run: |
           EMAIL=${{ env.EMAIL }}
           TIMESTAMP=$(date +"%d.%m.%Y")
@@ -31,7 +59,8 @@ jobs:
           # Add email to the end of LIST.txt
           echo "$EMAIL" >> blacklist/LIST.txt
 
-      - name: Create email file in mails directory
+      - name: Create email file in mails directory if accepted
+        if: env.DECISION == 'accept'
         run: |
           EMAIL=${{ env.EMAIL }}
           TITLE=${{ env.TITLE }}
@@ -39,4 +68,22 @@ jobs:
           CONTENT=${{ env.CONTENT }}
 
           mkdir -p blacklist/mails
-          echo -e
+          echo -e "**Title:** $TITLE\n\n**Date:** $DATE\n\n**Content:**\n\`\`\`\n$CONTENT\n\`\`\`" > blacklist/mails/${EMAIL}.md
+
+      - name: Commit changes
+        if: env.DECISION == 'accept'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add blacklist/LIST.txt blacklist/mails/
+          git commit -m "Add ${{ env.EMAIL }} to blacklist"
+          git push
+
+      - name: Post rejection comment if rejected
+        if: env.DECISION == 'reject'
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"body":"The request to add the email has been rejected."}' \
+            https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments
