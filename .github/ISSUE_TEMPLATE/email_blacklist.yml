@@ -1,39 +1,64 @@
-name: "Blacklist Email"
-description: "Report an email to be added to the blacklist"
-title: "Blacklist email: [EMAIL]"
+name: Blacklist Email
+description: Report an email to be added to the blacklist
+title: "[Report]: [EMAIL]"
 labels: ["blacklist"]
-assignees: "sefinek24"
+assignees:
+  - sefinek24
 
 body:
-  - type: input
-    id: email
+  - type: markdown
     attributes:
-      label: "Email"
-      description: "Enter the email address to be blacklisted"
-      placeholder: "example@example.com"
-      required: true
-
+      value: |
+        Thanks for taking the time to fill out this bug report!
   - type: input
-    id: title
+    id: contact
     attributes:
-      label: "Title"
-      description: "Enter the title of the email/message"
-      placeholder: "Email title"
-      required: true
-
-  - type: input
-    id: date
-    attributes:
-      label: "Date"
-      description: "Enter the date of the message"
-      placeholder: "15.09.2024"
-      required: true
-
+      label: Contact Details
+      description: How can we get in touch with you if we need more info?
+      placeholder: ex. email@example.com
+    validations:
+      required: false
   - type: textarea
-    id: content
+    id: what-happened
     attributes:
-      label: "Content"
-      description: "Enter the full content of the message"
-      placeholder: "Enter the message content here..."
-      value: ""
+      label: What happened?
+      description: Also tell us, what did you expect to happen?
+      placeholder: Tell us what you see!
+      value: "A bug happened!"
+    validations:
       required: true
+  - type: dropdown
+    id: version
+    attributes:
+      label: Version
+      description: What version of our software are you running?
+      options:
+        - 1.0.2 (Default)
+        - 1.0.3 (Edge)
+      default: 0
+    validations:
+      required: true
+  - type: dropdown
+    id: browsers
+    attributes:
+      label: What browsers are you seeing the problem on?
+      multiple: true
+      options:
+        - Firefox
+        - Chrome
+        - Safari
+        - Microsoft Edge
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
+      render: shell
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://example.com).
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true
