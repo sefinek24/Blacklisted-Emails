@@ -14,7 +14,7 @@ on:
 jobs:
   add_email_to_blacklist:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'issues' && github.event.action == 'opened' }}
+    if: ${{ github.event.action == 'opened' }}
 
     steps:
       - name: Checkout repository
@@ -23,21 +23,15 @@ jobs:
       - name: Extract issue content
         id: extract_content
         run: |
-          EMAIL=$(echo "${{ github.event.issue.body }}" | tr -d '\r' | awk '/## Email/{getline; print}')
-          TITLE=$(echo "${{ github.event.issue.body }}" | tr -d '\r' | awk '/## Title/{getline; print}')
-          DATE=$(echo "${{ github.event.issue.body }}" | tr -d '\r' | awk '/## Date/{getline; print}')
-          CONTENT=$(echo "${{ github.event.issue.body }}" | tr -d '\r' | sed -n '/## Content/,/```/{//!p}')
+          EMAIL=$(echo "${{ github.event.issue.body }}" | grep -oP '(?<=Email: ).*')
+          TITLE=$(echo "${{ github.event.issue.body }}" | grep -oP '(?<=Title: ).*')
+          DATE=$(echo "${{ github.event.issue.body }}" | grep -oP '(?<=Date: ).*')
+          CONTENT=$(echo "${{ github.event.issue.body }}" | grep -oP '(?<=Content:\n).*')
 
-          # Displaying values for debugging
           echo "EMAIL=$EMAIL" >> $GITHUB_ENV
           echo "TITLE=$TITLE" >> $GITHUB_ENV
           echo "DATE=$DATE" >> $GITHUB_ENV
           echo "CONTENT=$CONTENT" >> $GITHUB_ENV
-
-          echo "Extracted EMAIL: $EMAIL"
-          echo "Extracted TITLE: $TITLE"
-          echo "Extracted DATE: $DATE"
-          echo "Extracted CONTENT: $CONTENT"
 
       - name: Comment on the issue
         run: |
@@ -82,13 +76,8 @@ jobs:
       - name: Create email file in mails directory if accepted
         if: ${{ env.DECISION == 'accept' }}
         run: |
-          EMAIL=${{ env.EMAIL }}
-          TITLE=${{ env.TITLE }}
-          DATE=${{ env.DATE }}
-          CONTENT=${{ env.CONTENT }}
-
           mkdir -p blacklist/mails
-          echo -e "**Title:** $TITLE\n\n**Date:** $DATE\n\n**Content:**\n\`\`\`plaintext\n$CONTENT\n\`\`\`" > blacklist/mails/${EMAIL}.md
+          echo -e "**Title:** ${{ env.TITLE }}\n\n**Date:** ${{ env.DATE }}\n\n**Content:**\n\`\`\`plaintext\n${{ env.CONTENT }}\n\`\`\`" > blacklist/mails/${{ env.EMAIL }}.md
 
       - name: Commit changes
         if: ${{ env.DECISION == 'accept' }}
