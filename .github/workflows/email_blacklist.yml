@@ -23,10 +23,10 @@ jobs:
       - name: Extract issue content
         id: extract_content
         run: |
-          echo "EMAIL=$(echo "${{ github.event.issue.body }}" | grep -oP '(?<=## Email\n\n)[^\n]+')" >> $GITHUB_ENV
-          echo "TITLE=$(echo "${{ github.event.issue.body }}" | grep -oP '(?<=## Title\n\n)[^\n]+')" >> $GITHUB_ENV
-          echo "DATE=$(echo "${{ github.event.issue.body }}" | grep -oP '(?<=## Date\n\n)[^\n]+')" >> $GITHUB_ENV
-          echo "CONTENT=$(echo "${{ github.event.issue.body }}" | awk '/## Content/{flag=1;next}/```/{flag=0}flag')" >> $GITHUB_ENV
+          echo "EMAIL=$(echo \"${{ github.event.issue.body }}\" | grep -oP '(?<=## Email\n\n)[^\n]+')" >> $GITHUB_ENV
+          echo "TITLE=$(echo \"${{ github.event.issue.body }}\" | grep -oP '(?<=## Title\n\n)[^\n]+')" >> $GITHUB_ENV
+          echo "DATE=$(echo \"${{ github.event.issue.body }}\" | grep -oP '(?<=## Date\n\n)[^\n]+')" >> $GITHUB_ENV
+          echo "CONTENT=$(echo \"${{ github.event.issue.body }}\" | awk '/## Content/{flag=1;next}/```/{flag=0}flag')" >> $GITHUB_ENV
 
       - name: Comment on the issue
         run: |
@@ -53,6 +53,7 @@ jobs:
             echo "DECISION=reject" >> $GITHUB_ENV
           else
             echo "DECISION=none" >> $GITHUB_ENV
+          fi
 
       - name: Proceed if accepted
         if: ${{ env.DECISION == 'accept' }}
