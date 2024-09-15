@@ -33,6 +33,6 @@ body:
     id: content
     attributes:
       label: Content
-      render: plaintext
+      render: text
     validations:
       required: true

@@ -15,7 +15,7 @@ Lista ma na celu ułatwienie identyfikacji potencjalnych zagrożeń, co umożliw
 
 ## How to use this list?
 The list of blacklisted email addresses is available in the [LIST.txt](blacklist/LIST.txt) file.
-```
+```text
 https://raw.githubusercontent.com/sefinek24/Blacklisted-Emails/main/blacklist/LIST.txt
 ```
 
