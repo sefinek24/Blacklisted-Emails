@@ -50,6 +50,11 @@ jobs:
           DATE=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.date')
           CONTENT=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.content')
 
+          echo "Parsed Email: $EMAIL"
+          echo "Parsed Title: $TITLE"
+          echo "Parsed Date: $DATE"
+          echo "Parsed Content: $CONTENT"
+
           echo "email=$EMAIL" >> $GITHUB_ENV
           echo "title=$TITLE" >> $GITHUB_ENV
           echo "date=$DATE" >> $GITHUB_ENV
