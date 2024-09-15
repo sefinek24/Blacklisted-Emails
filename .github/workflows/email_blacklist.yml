@@ -22,13 +22,9 @@ jobs:
 
       - name: Parse issue content
         id: parse
-        uses: peter-murray/issue-forms-body-parser@v4
+        uses: onmax/issue-form-parser@v1.5
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          issue_id: ${{ github.event.issue.number }}
-          separator: '###'
-          label_marker_start: ''
-          label_marker_end: ''
+          issue_number: ${{ github.event.issue.number }}
 
       - name: Debug parsed data
         run: |
@@ -36,10 +32,10 @@ jobs:
 
       - name: Extract parsed data
         run: |
-          EMAIL=$(echo "${{ steps.parse.outputs.payload }}" | jq -r '.Email')
-          TITLE=$(echo "${{ steps.parse.outputs.payload }}" | jq -r '.Title')
-          DATE=$(echo "${{ steps.parse.outputs.payload }}" | jq -r '.Date')
-          CONTENT=$(echo "${{ steps.parse.outputs.payload }}" | jq -r '.Content')
+          EMAIL=$(echo "${{ steps.parse.outputs.payload }}" | jq -r '.email')
+          TITLE=$(echo "${{ steps.parse.outputs.payload }}" | jq -r '.title')
+          DATE=$(echo "${{ steps.parse.outputs.payload }}" | jq -r '.date')
+          CONTENT=$(echo "${{ steps.parse.outputs.payload }}" | jq -r '.content')
 
           echo "Email: $EMAIL"
           echo "Title: $TITLE"
