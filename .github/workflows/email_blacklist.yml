@@ -15,11 +15,6 @@ jobs:
   add_email_to_blacklist:
     runs-on: ubuntu-latest
     if: ${{ github.event.action == 'opened' }}
-    outputs:
-      email: ${{ steps.extract_email.outputs.email }}
-      title: ${{ steps.extract_email.outputs.title }}
-      date: ${{ steps.extract_email.outputs.date }}
-      content: ${{ steps.extract_email.outputs.content }}
 
     steps:
       - name: Checkout repository
@@ -54,8 +49,7 @@ jobs:
 
   process_decision:
     runs-on: ubuntu-latest
-    needs: add_email_to_blacklist
-    if: ${{ github.event.action == 'created' && github.event.issue.pull_request == null }}
+    if: ${{ github.event.comment.body != '' }}
 
     steps:
       - name: Checkout repository
@@ -75,10 +69,7 @@ jobs:
       - name: Proceed if accepted
         if: ${{ env.DECISION == 'accept' }}
         run: |
-          EMAIL="${{ needs.add_email_to_blacklist.outputs.email }}"
-          TITLE="${{ needs.add_email_to_blacklist.outputs.title }}"
-          DATE="${{ needs.add_email_to_blacklist.outputs.date }}"
-          CONTENT="${{ needs.add_email_to_blacklist.outputs.content }}"
+          EMAIL="${{ github.event.issue.title }}"
           TIMESTAMP=$(date +"%d.%m.%Y")
 
           # Update timestamp in LIST.txt
@@ -91,7 +82,7 @@ jobs:
         if: ${{ env.DECISION == 'accept' }}
         run: |
           mkdir -p blacklist/mails
-          echo -e "**Title:** $TITLE\n\n**Date:** $DATE\n\n**Content:**\n\`\`\`plaintext\n$CONTENT\n\`\`\`" > blacklist/mails/$EMAIL.md
+          echo -e "**Title:** ${{ github.event.issue.title }}\n\n**Date:** ${{ github.event.issue.created_at }}\n\n**Content:**\n\`\`\`plaintext\n${{ github.event.issue.body }}\n\`\`\`" > blacklist/mails/$EMAIL.md
 
       - name: Commit changes
         if: ${{ env.DECISION == 'accept' }}
