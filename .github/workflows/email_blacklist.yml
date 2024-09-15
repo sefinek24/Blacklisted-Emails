@@ -42,18 +42,31 @@ jobs:
         with:
           issue_number: ${{ github.event.issue.number }}
 
-      - name: Extract parsed data
+      - name: Validate
         id: extract_email
         run: |
-          EMAIL=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.email')
-          TITLE=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.title')
-          DATE=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.date')
-          CONTENT=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.content')
+          EMAIL=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.Email')
+          TITLE=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.Title')
+          DATE=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.Date')
+          CONTENT=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.Content')
+
+          # Debug information
+          echo "Parsed Email: $EMAIL"
+          echo "Parsed Title: $TITLE"
+          echo "Parsed Date: $DATE"
+          echo "Parsed Content: $CONTENT"
           
+          # Validation
+          if [[ -z "$EMAIL" || -z "$TITLE" || -z "$DATE" || -z "$CONTENT" ]]; then
+            echo "Error: Missing one or more required fields (Email, Title, Date, or Content)"
+            exit 1
+          fi
+          
+          # Save Email, Title, Date, and Content to environment variables
           echo "email=$EMAIL" >> $GITHUB_ENV
           echo "title=$TITLE" >> $GITHUB_ENV
           echo "date=$DATE" >> $GITHUB_ENV
-          echo "content=$CONTENT" >> $GITHUB_ENV
+          echo "content=$(echo \"$CONTENT\" | sed 's/\"/\\\"/g')" >> $GITHUB_ENV
 
       - name: Extract comment command
         run: |
@@ -81,9 +94,7 @@ jobs:
         if: ${{ env.DECISION == 'accept' }}
         run: |
           mkdir -p blacklist/mails
-          echo -e "**Title:** $TITLE\n\n**Date:** $DATE\n\n**Content:**\n\`\`\`text" > blacklist/mails/$EMAIL.md
-          cat content.tmp >> blacklist/mails/$EMAIL.md
-          echo -e "\n\`\`\`" >> blacklist/mails/$EMAIL.md
+          echo -e "**Title:** $TITLE\n\n**Date:** $DATE\n\n**Content:**\n\`\`\`text\n$CONTENT\n\`\`\`" > blacklist/mails/$EMAIL.md
 
       - name: Commit changes
         if: ${{ env.DECISION == 'accept' }}
