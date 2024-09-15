@@ -76,7 +76,13 @@ jobs:
           CONTENT=${{ env.CONTENT }}
 
           mkdir -p blacklist/mails
-          echo -e "**Title:** $TITLE\n\n**Date:** $DATE\n\n**Content:**\n\`\`\`\n$CONTENT\n\`\`\`" > blacklist/mails/${EMAIL}.md
+
+          echo "EMAIL: $EMAIL"
+          echo "TITLE: $TITLE"
+          echo "DATE: $DATE"
+          echo "CONTENT: $CONTENT"
+
+          echo -e "**Title:** $TITLE\n\n**Date:** $DATE\n\n**Content:**\n\`\`\`plaintext\n$CONTENT\n\`\`\`" > blacklist/mails/${EMAIL}.md
 
       - name: Commit changes
         if: ${{ env.DECISION == 'accept' }}
