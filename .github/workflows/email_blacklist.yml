@@ -32,15 +32,22 @@ jobs:
 
       - name: Extract parsed data
         run: |
-          EMAIL=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.Email')
-          TITLE=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.Title')
-          DATE=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.Date')
-          CONTENT=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.Content')
+          EMAIL=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.email')
+          TITLE=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.title')
+          DATE=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.date')
+          CONTENT=$(echo '${{ steps.parse.outputs.payload }}' | jq -r '.content')
 
           echo "Email: $EMAIL"
           echo "Title: $TITLE"
           echo "Date: $DATE"
           echo "Content: $CONTENT"
+
+      - name: Set email data to environment
+        run: |
+          echo "EMAIL=${EMAIL}" >> $GITHUB_ENV
+          echo "TITLE=${TITLE}" >> $GITHUB_ENV
+          echo "DATE=${DATE}" >> $GITHUB_ENV
+          echo "CONTENT=${CONTENT}" >> $GITHUB_ENV
 
       - name: Comment on the issue
         run: |
