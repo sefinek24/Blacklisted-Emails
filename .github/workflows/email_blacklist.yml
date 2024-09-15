@@ -13,8 +13,8 @@ on:
 
 jobs:
   add_email_to_blacklist:
-    if: github.event_name == 'issues' && github.event.action == 'opened'
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'issues' && github.event.action == 'opened' }}
 
     steps:
       - name: Checkout repository
@@ -23,10 +23,10 @@ jobs:
       - name: Extract issue content
         id: extract_content
         run: |
-          EMAIL=$(echo "${{ github.event.issue.body }}" | grep -oP '(?<=## Email\s*\n)[^\n]+')
-          TITLE=$(echo "${{ github.event.issue.body }}" | grep -oP '(?<=## Title\s*\n)[^\n]+')
-          DATE=$(echo "${{ github.event.issue.body }}" | grep -oP '(?<=## Date\s*\n)[^\n]+')
-          CONTENT=$(echo "${{ github.event.issue.body }}" | sed -n '/## Content/,/```/{//!p}')
+          EMAIL=$(echo "${{ github.event.issue.body }}" | tr -d '\r' | awk '/## Email/{getline; print}')
+          TITLE=$(echo "${{ github.event.issue.body }}" | tr -d '\r' | awk '/## Title/{getline; print}')
+          DATE=$(echo "${{ github.event.issue.body }}" | tr -d '\r' | awk '/## Date/{getline; print}')
+          CONTENT=$(echo "${{ github.event.issue.body }}" | tr -d '\r' | sed -n '/## Content/,/```/{//!p}')
 
           # Displaying values for debugging
           echo "EMAIL=$EMAIL" >> $GITHUB_ENV
@@ -48,8 +48,9 @@ jobs:
             https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments
 
   process_decision:
-    if: github.event_name == 'issue_comment' && github.event.action == 'created'
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'issue_comment' && github.event.action == 'created' }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
